@@ -33,6 +33,7 @@ Central sequencer to determine the order of batched transactions which are sent 
 
 ## Set-up
 ### Hardware Set-up and Differences
+![](https://github.com/Sagarnandeshwar/Rolis_Analysis/blob/main/images/h.png)
 Total Cost of ownership = 560.6 CAD
 
 ### Software Set-up
@@ -77,9 +78,14 @@ Evaluating Rolis performance on TPC-C and YCSB++ benchmarks and comparing it aga
 - To test the limit of Rolis on heavy workload (YCSB++)
 - To compare Rolis performance against Single Machine (non-replicated) Database (Silo)
 **Reproducing:** Section 6.2 Performance and scalability Figure 10. Throughput (million TPS in y-axis) over worker threads on TPC-C and YCSB++ benchmark.
+
+![](https://github.com/Sagarnandeshwar/Rolis_Analysis/blob/main/images/1.png)
+
 Two benchmarks are as follows,
 - **TPC-C Dataset:** Consist of complex transactions, such as NewOrder (NEW), Payment (PAY), OrderStatus (ORDER), StockLevel (STOCK), and Delivery (DLVR).
 - **YCSB++ Dataset:** Consist of simple Read-Only (READ) and Read-Modify-Write (RMW). There are 50% Reads and 50% RMW request, and in total 1 million keys and pairs.
+
+![](https://github.com/Sagarnandeshwar/Rolis_Analysis/blob/main/images/1r.png)
 
 The gap between blue (Rolis Performance) and red (Silo Performance) line (majorly) represents latency due to replication layer.
 In our experiments we see a very similar trend to the paper in the performance of Rolis for both TPC-C and
@@ -91,6 +97,9 @@ We also notice that for both TCP and YCSB++, the throughput increase is not as l
 Comparing Rolis performance against 2PL and Calvin.
 **Motivation:** Compare Rolis performance against state-of-art transactional databases
 **Reproducing:** Section 6.3 Comparison with software implementations. Figure 12. Comparisons with traditional software implementations: throughput on YCSB++ benchmark.)
+![](https://github.com/Sagarnandeshwar/Rolis_Analysis/blob/main/images/2.png)
+
+![](https://github.com/Sagarnandeshwar/Rolis_Analysis/blob/main/images/2r.png)
 
 We again see similar trends in the throughput of Rolis, as well as Calvin and 2PL, as in the paper. Rolis has outperformed 2PL and Calvin. This was expected as 2PL follows server-client architecture, whereas Rolis OCC-based implementation, this causes Calvin to have more contentions as compared to Rolis. On the other hand, Calvin needs a central sequencer to determine the order for a batch of transactions before they start execution which is expensive compared to Rolis.
 Here we again observe that the throughput of Rolis dipped as we increased the number of threads as compared to
@@ -100,6 +109,8 @@ the paper. We also notice that none of the systems were able to reach as high th
 Analyzing the effect of log batching on throughput and latency.
 **Motivation:** Analyzing throughput vs latency trade-off due to log batching.
 **Reproducing:** Section 6.8 Batch size versus latency Figure 16. Latency and throughput with different batch sizes (16 threads, TPC-C))
+![](https://github.com/Sagarnandeshwar/Rolis_Analysis/blob/main/images/3.png)
+![](https://github.com/Sagarnandeshwar/Rolis_Analysis/blob/main/images/3r.png)
 
 Except batch_size if 100 and 1600, the throughput we receive is very similar the paper. The throughput, as expected, increases as we increase the size of log batch from 50 to 800, and then decrease after 800. However, for batch_size 100 and 1600 we regularly received an irregular throughput. For batch_size 100, I did not see any significant difference during the experiment, but for batch_size 1600, I do observe a significantly longer wait on leader replica, than other batch_size. We can also see that the latency for batch_size 100 and 1600 is a bit higher than expected.
 We know that as we increase the batch_size the performance increases due to parallelization, however this also introduces longer latency. This may become more significant at batch_size 1600, due to lower RAM and processing power. For batch_size 100 we say that the batch_size is too small for 16 threads running TCP commands as they are comprising of complex request, demanding more processing time, because of which transaction have longer latency before execution.
